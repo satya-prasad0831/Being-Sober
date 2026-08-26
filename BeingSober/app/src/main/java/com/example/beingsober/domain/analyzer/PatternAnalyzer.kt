@@ -30,6 +30,7 @@ class PatternAnalyzer @Inject constructor() {
                     it.trigger
                 )
             }
+
         if (grouped.isEmpty()) {
             return null
         }
