@@ -1,11 +1,14 @@
 package com.example.beingsober.domain.plan
+
 import javax.inject.Inject
 
 class PlanGenerator @Inject constructor() {
 
     fun generate(
         trigger: String?,
-        habitType: String?
+        habitType: String?,
+        incidentCount: Int = 0,
+        averageUrge: Double = 0.0
     ): RecoveryPlan {
 
         val normalizedTrigger =
@@ -17,40 +20,77 @@ class PlanGenerator @Inject constructor() {
         return when {
 
             normalizedTrigger.contains("STRESS") ->
-                stressPlan(habit)
+                stressPlan(
+                    habit,
+                    incidentCount,
+                    averageUrge
+                )
 
             normalizedTrigger.contains("BOREDOM") ->
-                boredomPlan(habit)
+                boredomPlan(
+                    habit,
+                    incidentCount,
+                    averageUrge
+                )
 
             normalizedTrigger.contains("SOCIAL") ->
-                socialPlan(habit)
+                socialPlan(
+                    habit,
+                    incidentCount,
+                    averageUrge
+                )
 
             normalizedTrigger.contains("ANGER") ->
-                angerPlan(habit)
+                angerPlan(
+                    habit,
+                    incidentCount,
+                    averageUrge
+                )
 
             normalizedTrigger.contains("LONELY") ||
                     normalizedTrigger.contains("LONELINESS") ->
-                lonelinessPlan(habit)
+                lonelinessPlan(
+                    habit,
+                    incidentCount,
+                    averageUrge
+                )
 
             normalizedTrigger.contains("CRAVING") ->
-                cravingPlan(habit)
+                cravingPlan(
+                    habit,
+                    incidentCount,
+                    averageUrge
+                )
 
             normalizedTrigger.contains("ROUTINE") ||
                     normalizedTrigger.contains("HABIT") ->
-                routinePlan(habit)
+                routinePlan(
+                    habit,
+                    incidentCount,
+                    averageUrge
+                )
 
             else ->
-                generalPlan(habit)
+                generalPlan(
+                    habit,
+                    incidentCount,
+                    averageUrge
+                )
         }
     }
 
     private fun stressPlan(
-        habitType: String
+        habitType: String,
+        incidentCount: Int,
+        averageUrge: Double
     ): RecoveryPlan {
 
         return RecoveryPlan(
             title = "STRESS RESPONSE",
             trigger = "Stress",
+            habitType = habitType,
+            incidentCount = incidentCount,
+            averageUrge = averageUrge,
             steps = listOf(
                 PlanStep(
                     number = 1,
@@ -77,12 +117,17 @@ class PlanGenerator @Inject constructor() {
     }
 
     private fun boredomPlan(
-        habitType: String
+        habitType: String,
+        incidentCount: Int,
+        averageUrge: Double
     ): RecoveryPlan {
 
         return RecoveryPlan(
             title = "BOREDOM RESPONSE",
             trigger = "Boredom",
+            habitType = habitType,
+            incidentCount = incidentCount,
+            averageUrge = averageUrge,
             steps = listOf(
                 PlanStep(
                     number = 1,
@@ -109,12 +154,17 @@ class PlanGenerator @Inject constructor() {
     }
 
     private fun socialPlan(
-        habitType: String
+        habitType: String,
+        incidentCount: Int,
+        averageUrge: Double
     ): RecoveryPlan {
 
         return RecoveryPlan(
             title = "SOCIAL RESPONSE",
             trigger = "Social",
+            habitType = habitType,
+            incidentCount = incidentCount,
+            averageUrge = averageUrge,
             steps = listOf(
                 PlanStep(
                     number = 1,
@@ -141,12 +191,17 @@ class PlanGenerator @Inject constructor() {
     }
 
     private fun angerPlan(
-        habitType: String
+        habitType: String,
+        incidentCount: Int,
+        averageUrge: Double
     ): RecoveryPlan {
 
         return RecoveryPlan(
             title = "ANGER RESPONSE",
             trigger = "Anger",
+            habitType = habitType,
+            incidentCount = incidentCount,
+            averageUrge = averageUrge,
             steps = listOf(
                 PlanStep(
                     number = 1,
@@ -173,12 +228,17 @@ class PlanGenerator @Inject constructor() {
     }
 
     private fun lonelinessPlan(
-        habitType: String
+        habitType: String,
+        incidentCount: Int,
+        averageUrge: Double
     ): RecoveryPlan {
 
         return RecoveryPlan(
             title = "LONELINESS RESPONSE",
             trigger = "Loneliness",
+            habitType = habitType,
+            incidentCount = incidentCount,
+            averageUrge = averageUrge,
             steps = listOf(
                 PlanStep(
                     number = 1,
@@ -205,12 +265,17 @@ class PlanGenerator @Inject constructor() {
     }
 
     private fun cravingPlan(
-        habitType: String
+        habitType: String,
+        incidentCount: Int,
+        averageUrge: Double
     ): RecoveryPlan {
 
         return RecoveryPlan(
             title = "CRAVING RESPONSE",
             trigger = "Craving",
+            habitType = habitType,
+            incidentCount = incidentCount,
+            averageUrge = averageUrge,
             steps = listOf(
                 PlanStep(
                     number = 1,
@@ -237,12 +302,17 @@ class PlanGenerator @Inject constructor() {
     }
 
     private fun routinePlan(
-        habitType: String
+        habitType: String,
+        incidentCount: Int,
+        averageUrge: Double
     ): RecoveryPlan {
 
         return RecoveryPlan(
             title = "ROUTINE BREAK",
             trigger = "Habit / Routine",
+            habitType = habitType,
+            incidentCount = incidentCount,
+            averageUrge = averageUrge,
             steps = listOf(
                 PlanStep(
                     number = 1,
@@ -269,12 +339,17 @@ class PlanGenerator @Inject constructor() {
     }
 
     private fun generalPlan(
-        habitType: String
+        habitType: String,
+        incidentCount: Int,
+        averageUrge: Double
     ): RecoveryPlan {
 
         return RecoveryPlan(
             title = "URGE RESPONSE",
             trigger = "Unknown",
+            habitType = habitType,
+            incidentCount = incidentCount,
+            averageUrge = averageUrge,
             steps = listOf(
                 PlanStep(
                     number = 1,

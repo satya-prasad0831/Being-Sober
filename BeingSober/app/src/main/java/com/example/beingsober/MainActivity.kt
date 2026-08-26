@@ -6,6 +6,7 @@ import androidx.activity.compose.BackHandler
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -145,14 +146,25 @@ class MainActivity : ComponentActivity() {
                         }
                     )
 
-                }  else if (showPlan) {
+                } else if (showPlan) {
 
-            PlanScreen(
-                plan = recoveryPlan,
-                onBack = {
-                    showPlan = false
-                }
-            )
+                    if (recoveryPlan == null) {
+
+                        NoPlanScreen(
+                            onBack = {
+                                showPlan = false
+                            }
+                        )
+
+                    } else {
+
+                        PlanScreen(
+                            plan = recoveryPlan,
+                            onBack = {
+                                showPlan = false
+                            }
+                        )
+                    }
 
                 } else {
 

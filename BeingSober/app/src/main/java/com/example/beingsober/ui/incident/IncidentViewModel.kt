@@ -45,15 +45,19 @@ class IncidentViewModel @Inject constructor(
                 initialValue = null
             )
 
-    val recoveryPlan: StateFlow<RecoveryPlan> =
-        detectedPattern
-            .map { pattern ->
+    val recoveryPlan =
+        detectedPattern.map { pattern ->
+
+            pattern?.let {
 
                 planGenerator.generate(
-                    trigger = pattern?.trigger,
-                    habitType = pattern?.habitType
+                    trigger = it.trigger,
+                    habitType = it.habitType,
+                    incidentCount = it.count,
+                    averageUrge = it.averageUrge
                 )
             }
+        }
             .stateIn(
                 scope = viewModelScope,
                 started = SharingStarted.WhileSubscribed(5_000),

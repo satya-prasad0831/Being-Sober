@@ -107,6 +107,28 @@ fun PlanScreen(
             )
 
             Spacer(
+                modifier = Modifier.height(4.dp)
+            )
+
+            Text(
+                text = "Habit: ${plan.habitType}",
+                color = Color.Gray,
+                fontSize = 14.sp
+            )
+
+            Spacer(
+                modifier = Modifier.height(4.dp)
+            )
+
+            Text(
+                text = "Seen ${plan.incidentCount} times  •  Average urge ${
+                    String.format("%.1f", plan.averageUrge)
+                }/10",
+                color = Color.Gray,
+                fontSize = 14.sp
+            )
+
+            Spacer(
                 modifier = Modifier.height(24.dp)
             )
 
