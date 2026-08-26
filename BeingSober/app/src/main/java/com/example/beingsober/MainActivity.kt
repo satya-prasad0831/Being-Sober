@@ -230,3 +230,62 @@ fun SplashScreen(
         }
     }
 }
+@Composable
+fun NoPlanScreen(
+    onBack: () -> Unit
+) {
+
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(Color.Black),
+        contentAlignment = Alignment.Center
+    ) {
+
+        Column(
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+
+            Text(
+                text = "← BACK",
+                color = Color(0xFFFF3B30),
+                fontSize = 13.sp,
+                fontWeight = FontWeight.Bold,
+                modifier = Modifier.clickable {
+                    onBack()
+                }
+            )
+
+            Spacer(
+                modifier = Modifier.height(28.dp)
+            )
+
+            Text(
+                text = "🔎",
+                fontSize = 40.sp
+            )
+
+            Spacer(
+                modifier = Modifier.height(16.dp)
+            )
+
+            Text(
+                text = "NO PATTERN YET",
+                color = Color.White,
+                fontSize = 22.sp,
+                fontWeight = FontWeight.Bold
+            )
+
+            Spacer(
+                modifier = Modifier.height(10.dp)
+            )
+
+            Text(
+                text = "Record at least two similar incidents\nbefore we create a personalized plan.",
+                color = Color.Gray,
+                fontSize = 14.sp,
+                textAlign = TextAlign.Center
+            )
+        }
+    }
+}
