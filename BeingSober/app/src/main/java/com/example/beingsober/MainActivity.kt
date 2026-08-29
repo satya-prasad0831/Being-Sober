@@ -5,6 +5,13 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.BackHandler
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.slideInHorizontally
+import androidx.compose.animation.slideOutHorizontally
+import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -16,6 +23,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -27,20 +35,21 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import com.example.beingsober.data.local.PreferencesManager
 import com.example.beingsober.data.soberQuotes
-import com.example.beingsober.ui.home.HomeScreen
-import com.example.beingsober.ui.setup.SetupScreen
-import com.example.beingsober.ui.theme.BeingSoberTheme
-import kotlinx.coroutines.delay
-import dagger.hilt.android.AndroidEntryPoint
-import com.example.beingsober.ui.incident.IncidentScreen
-import com.example.beingsober.ui.patterns.PatternsScreen
-import androidx.compose.runtime.collectAsState
-import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
-import com.example.beingsober.ui.incident.IncidentViewModel
 import com.example.beingsober.ui.evidence.EvidenceScreen
+import com.example.beingsober.ui.home.HomeScreen
+import com.example.beingsober.ui.incident.IncidentScreen
+import com.example.beingsober.ui.incident.IncidentViewModel
+import com.example.beingsober.ui.patterns.PatternsScreen
 import com.example.beingsober.ui.plan.PlanScreen
+import com.example.beingsober.ui.setup.SetupScreen
+import com.example.beingsober.ui.statistics.StatisticsScreen
+import com.example.beingsober.ui.theme.BeingSoberTheme
+import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.delay
+
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
 
@@ -49,12 +58,15 @@ class MainActivity : ComponentActivity() {
 
         enableEdgeToEdge()
 
-        val preferencesManager = PreferencesManager(this)
+        val preferencesManager =
+            PreferencesManager(this)
 
         setContent {
 
             BeingSoberTheme {
-                val incidentViewModel: IncidentViewModel = hiltViewModel()
+
+                val incidentViewModel: IncidentViewModel =
+                    hiltViewModel()
 
                 var showSplash by remember {
                     mutableStateOf(true)
@@ -65,32 +77,64 @@ class MainActivity : ComponentActivity() {
                         preferencesManager.isSetupComplete()
                     )
                 }
+
                 var showIncident by remember {
                     mutableStateOf(false)
                 }
+
                 var showPatterns by remember {
                     mutableStateOf(false)
                 }
+
                 var showEvidence by remember {
                     mutableStateOf(false)
                 }
+
                 var showPlan by remember {
                     mutableStateOf(false)
                 }
+
+                var showStatistics by remember {
+                    mutableStateOf(false)
+                }
+
                 val incidents =
-                    incidentViewModel.incidents.collectAsState().value
+                    incidentViewModel
+                        .incidents
+                        .collectAsState()
+                        .value
 
                 val recoveryPlan =
-                    incidentViewModel.recoveryPlan.collectAsState().value
+                    incidentViewModel
+                        .recoveryPlan
+                        .collectAsState()
+                        .value
 
                 BackHandler(
-                    enabled = showIncident || showPatterns || showEvidence || showPlan
+                    enabled =
+                        showIncident ||
+                                showPatterns ||
+                                showEvidence ||
+                                showPlan ||
+                                showStatistics
                 ) {
+
                     when {
-                        showIncident -> showIncident = false
-                        showPatterns -> showPatterns = false
-                        showEvidence -> showEvidence = false
-                        showPlan -> showPlan = false
+
+                        showIncident ->
+                            showIncident = false
+
+                        showPatterns ->
+                            showPatterns = false
+
+                        showEvidence ->
+                            showEvidence = false
+
+                        showPlan ->
+                            showPlan = false
+
+                        showStatistics ->
+                            showStatistics = false
                     }
                 }
 
@@ -115,77 +159,219 @@ class MainActivity : ComponentActivity() {
                         }
                     )
 
-                }  else if (showIncident) {
-
-                    IncidentScreen(
-                        habitType = preferencesManager.getHabitType() ?: "BOTH",
-
-                        onSaveIncident = {
-                            showIncident = false
-                        },
-                        onBack = {
-                            showIncident = false
-                        }
-                    )
-
-                } else if (showPatterns) {
-
-                    PatternsScreen(
-                        incidents = incidents,
-                        onBack = {
-                            showPatterns = false
-                        }
-                    )
-
-                } else if (showEvidence) {
-
-                    EvidenceScreen(
-                        incidents = incidents,
-                        onBack = {
-                            showEvidence = false
-                        }
-                    )
-
-                } else if (showPlan) {
-
-                    if (recoveryPlan == null) {
-
-                        NoPlanScreen(
-                            onBack = {
-                                showPlan = false
-                            }
-                        )
-
-                    } else {
-
-                        PlanScreen(
-                            plan = recoveryPlan,
-                            onBack = {
-                                showPlan = false
-                            }
-                        )
-                    }
-
                 } else {
 
-                    HomeScreen(
-                        habitType = preferencesManager.getHabitType(),
+                    /*
+                     * Identify the currently visible screen.
+                     *
+                     * This is only used for animation.
+                     * Your existing Boolean navigation remains unchanged.
+                     */
+                    val currentScreen =
+                        when {
 
-                        onNewIncident = {
-                            showIncident = true
-                        },
+                            showIncident ->
+                                "incident"
 
-                        onPatterns = {
-                            showPatterns = true
-                        },
-                        onEvidence = {
-                            showEvidence = true
-                        },
+                            showPatterns ->
+                                "patterns"
 
-                        onPlan = {
-                            showPlan = true
+                            showEvidence ->
+                                "evidence"
+
+                            showStatistics ->
+                                "statistics"
+
+                            showPlan ->
+                                "plan"
+
+                            else ->
+                                "home"
                         }
-                    )
+
+                    /*
+                     * Smooth page transition
+                     */
+                    AnimatedContent(
+                        targetState = currentScreen,
+                        transitionSpec = {
+
+                            (
+                                    slideInHorizontally(
+                                        animationSpec =
+                                            tween(
+                                                durationMillis = 300
+                                            ),
+                                        initialOffsetX = {
+                                            it
+                                        }
+                                    ) +
+                                            fadeIn(
+                                                animationSpec =
+                                                    tween(
+                                                        durationMillis = 300
+                                                    )
+                                            )
+                                    ).togetherWith(
+
+                                    slideOutHorizontally(
+                                        animationSpec =
+                                            tween(
+                                                durationMillis = 300
+                                            ),
+                                        targetOffsetX = {
+                                            -it / 4
+                                        }
+                                    ) +
+                                            fadeOut(
+                                                animationSpec =
+                                                    tween(
+                                                        durationMillis = 200
+                                                    )
+                                            )
+                                )
+                        },
+                        label = "BeingSoberScreenTransition"
+                    ) { screen ->
+
+                        when (screen) {
+
+                            /*
+                             * INCIDENT
+                             */
+                            "incident" -> {
+
+                                IncidentScreen(
+
+                                    habitType =
+                                        preferencesManager
+                                            .getHabitType()
+                                            ?: "BOTH",
+
+                                    onSaveIncident = {
+                                        showIncident = false
+                                    },
+
+                                    onBack = {
+                                        showIncident = false
+                                    }
+                                )
+                            }
+
+                            /*
+                             * PATTERNS
+                             */
+                            "patterns" -> {
+
+                                PatternsScreen(
+
+                                    incidents = incidents,
+
+                                    onBack = {
+                                        showPatterns = false
+                                    }
+                                )
+                            }
+
+                            /*
+                             * EVIDENCE
+                             */
+                            "evidence" -> {
+
+                                EvidenceScreen(
+
+                                    incidents = incidents,
+
+                                    onBack = {
+                                        showEvidence = false
+                                    }
+                                )
+                            }
+
+                            /*
+                             * STATISTICS
+                             */
+                            "statistics" -> {
+
+                                val streakResult =
+                                    incidentViewModel
+                                        .streakResult
+                                        .collectAsState()
+                                        .value
+
+                                StatisticsScreen(
+
+                                    incidents = incidents,
+
+                                    longestStreak =
+                                        streakResult.longestStreak,
+
+                                    onBack = {
+                                        showStatistics = false
+                                    }
+                                )
+                            }
+
+                            /*
+                             * PLAN
+                             */
+                            "plan" -> {
+
+                                if (recoveryPlan == null) {
+
+                                    NoPlanScreen(
+                                        onBack = {
+                                            showPlan = false
+                                        }
+                                    )
+
+                                } else {
+
+                                    PlanScreen(
+
+                                        plan = recoveryPlan,
+
+                                        onBack = {
+                                            showPlan = false
+                                        }
+                                    )
+                                }
+                            }
+
+                            /*
+                             * HOME
+                             */
+                            else -> {
+
+                                HomeScreen(
+
+                                    habitType =
+                                        preferencesManager
+                                            .getHabitType(),
+
+                                    onNewIncident = {
+                                        showIncident = true
+                                    },
+
+                                    onPatterns = {
+                                        showPatterns = true
+                                    },
+
+                                    onEvidence = {
+                                        showEvidence = true
+                                    },
+
+                                    onPlan = {
+                                        showPlan = true
+                                    },
+
+                                    onStatistics = {
+                                        showStatistics = true
+                                    }
+                                )
+                            }
+                        }
+                    }
                 }
             }
         }
@@ -197,9 +383,10 @@ fun SplashScreen(
     onFinished: () -> Unit
 ) {
 
-    val quote = remember {
-        soberQuotes.random()
-    }
+    val quote =
+        remember {
+            soberQuotes.random()
+        }
 
     LaunchedEffect(Unit) {
 
@@ -212,36 +399,55 @@ fun SplashScreen(
         modifier = Modifier
             .fillMaxSize()
             .background(Color.Black),
-        contentAlignment = Alignment.Center
+
+        contentAlignment =
+            Alignment.Center
     ) {
 
         Column(
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.Center
+            horizontalAlignment =
+                Alignment.CenterHorizontally,
+
+            verticalArrangement =
+                Arrangement.Center
         ) {
 
             Text(
                 text = "\"$quote\"",
+
                 color = Color.White,
+
                 fontSize = 24.sp,
-                fontWeight = FontWeight.Medium,
-                textAlign = TextAlign.Center
+
+                fontWeight =
+                    FontWeight.Medium,
+
+                textAlign =
+                    TextAlign.Center
             )
 
             Spacer(
-                modifier = Modifier.height(24.dp)
+                modifier =
+                    Modifier.height(24.dp)
             )
 
             Text(
                 text = "— BEING SOBER",
-                color = Color(0xFFFF3B30),
+
+                color =
+                    Color(0xFFFF3B30),
+
                 fontSize = 13.sp,
-                fontWeight = FontWeight.Bold,
+
+                fontWeight =
+                    FontWeight.Bold,
+
                 letterSpacing = 2.sp
             )
         }
     }
 }
+
 @Composable
 fun NoPlanScreen(
     onBack: () -> Unit
@@ -251,52 +457,78 @@ fun NoPlanScreen(
         modifier = Modifier
             .fillMaxSize()
             .background(Color.Black),
-        contentAlignment = Alignment.Center
+
+        contentAlignment =
+            Alignment.Center
     ) {
 
         Column(
-            horizontalAlignment = Alignment.CenterHorizontally
+            horizontalAlignment =
+                Alignment.CenterHorizontally
         ) {
 
             Text(
                 text = "← BACK",
-                color = Color(0xFFFF3B30),
+
+                color =
+                    Color(0xFFFF3B30),
+
                 fontSize = 13.sp,
-                fontWeight = FontWeight.Bold,
-                modifier = Modifier.clickable {
-                    onBack()
-                }
+
+                fontWeight =
+                    FontWeight.Bold,
+
+                modifier =
+                    Modifier.clickable {
+                        onBack()
+                    }
             )
 
             Spacer(
-                modifier = Modifier.height(28.dp)
+                modifier =
+                    Modifier.height(28.dp)
             )
 
             Text(
                 text = "🔎",
+
                 fontSize = 40.sp
             )
 
             Spacer(
-                modifier = Modifier.height(16.dp)
+                modifier =
+                    Modifier.height(16.dp)
             )
 
             Text(
                 text = "NO PATTERN YET",
-                color = Color.White,
+
+                color =
+                    Color.White,
+
                 fontSize = 22.sp,
-                fontWeight = FontWeight.Bold
+
+                fontWeight =
+                    FontWeight.Bold
             )
 
             Spacer(
-                modifier = Modifier.height(10.dp)
+                modifier =
+                    Modifier.height(10.dp)
             )
 
             Text(
-                text = "Record at least two similar incidents\nbefore we create a personalized plan.",
-                color = Color.Gray,
+                text =
+                    "Record at least two similar incidents\n" +
+                            "before we create a personalized plan.",
+
+                color =
+                    Color.Gray,
+
                 fontSize = 14.sp,
-                textAlign = TextAlign.Center
+
+                textAlign =
+                    TextAlign.Center
             )
         }
     }

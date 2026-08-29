@@ -47,6 +47,7 @@ fun HomeScreen(
     onPatterns: () -> Unit = {},
     onEvidence: () -> Unit = {},
     onPlan: () -> Unit = {},
+    onStatistics: () -> Unit = {},
     viewModel: IncidentViewModel = hiltViewModel()
 ) {
 
@@ -291,6 +292,16 @@ fun HomeScreen(
                         onPlan
                 )
             }
+            Spacer(
+                modifier = Modifier.height(10.dp)
+            )
+
+            NavigationCard(
+                title = "Statistics",
+                subtitle = "Your recovery data",
+                modifier = Modifier.fillMaxWidth(),
+                onClick = onStatistics
+            )
         }
     }
 }
