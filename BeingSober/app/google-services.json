@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "330273438669",
+    "project_id": "being-sober-6409c",
+    "storage_bucket": "being-sober-6409c.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:330273438669:android:3a6b44bede79ae5bc1e284",
+        "android_client_info": {
+          "package_name": "com.example.beingsober"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyD8bPredO1WJTwqrxUSkb6luu85H2ZjFS4"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

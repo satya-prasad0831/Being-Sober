@@ -48,6 +48,7 @@ fun HomeScreen(
     onEvidence: () -> Unit = {},
     onPlan: () -> Unit = {},
     onStatistics: () -> Unit = {},
+    onUrgeBreak: () -> Unit = {},
     viewModel: IncidentViewModel = hiltViewModel()
 ) {
 
@@ -61,10 +62,6 @@ fun HomeScreen(
         viewModel.streakResult.collectAsState().value
 
     val incidentCount = incidents.size
-
-    // -----------------------------
-    // TODAY'S DATA
-    // -----------------------------
 
     val startOfToday =
         Calendar.getInstance().apply {
@@ -117,10 +114,6 @@ fun HomeScreen(
             0
         }
 
-    // -----------------------------
-    // HOME
-    // -----------------------------
-
     Box(
         modifier = Modifier
             .fillMaxSize()
@@ -139,10 +132,6 @@ fun HomeScreen(
                     bottom = 30.dp
                 )
         ) {
-
-            // -----------------------------
-            // HEADER
-            // -----------------------------
 
             Text(
                 text = "BEING SOBER",
@@ -168,10 +157,6 @@ fun HomeScreen(
                 modifier = Modifier.height(30.dp)
             )
 
-            // -----------------------------
-            // STREAK
-            // -----------------------------
-
             MainStreakCard(
                 currentStreak =
                     streakResult.currentStreak,
@@ -183,10 +168,6 @@ fun HomeScreen(
             Spacer(
                 modifier = Modifier.height(18.dp)
             )
-
-            // -----------------------------
-            // TODAY
-            // -----------------------------
 
             TodayRecoveryCard(
                 todayCount =
@@ -206,10 +187,6 @@ fun HomeScreen(
                 modifier = Modifier.height(18.dp)
             )
 
-            // -----------------------------
-            // INSIGHT
-            // -----------------------------
-
             InsightCard(
                 detectedPattern =
                     detectedPattern
@@ -219,10 +196,13 @@ fun HomeScreen(
                 modifier = Modifier.height(18.dp)
             )
 
-            // -----------------------------
-            // NEW INVESTIGATION
-            // -----------------------------
+            UrgeBreakButton(
+                onClick = onUrgeBreak
+            )
 
+            Spacer(
+                modifier = Modifier.height(14.dp)
+            )
             InvestigationButton(
                 onClick =
                     onNewIncident
@@ -231,11 +211,6 @@ fun HomeScreen(
             Spacer(
                 modifier = Modifier.height(26.dp)
             )
-
-            // -----------------------------
-            // NAVIGATION
-            // -----------------------------
-
             Text(
                 text = "EXPLORE YOUR RECOVERY",
                 color = SecondaryText,
@@ -305,6 +280,8 @@ fun HomeScreen(
         }
     }
 }
+
+
 @Composable
 private fun MainStreakCard(
     currentStreak: Int,
@@ -661,6 +638,48 @@ private fun NavigationCard(
             text = subtitle,
             color = SecondaryText,
             fontSize = 10.sp
+        )
+    }
+}
+@Composable
+private fun UrgeBreakButton(
+    onClick: () -> Unit
+) {
+
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .background(
+                color = Color(0xFF160606),
+                shape = RoundedCornerShape(18.dp)
+            )
+            .border(
+                width = 1.dp,
+                color = Color(0xFF3A1717),
+                shape = RoundedCornerShape(18.dp)
+            )
+            .clickable {
+                onClick()
+            }
+            .padding(18.dp)
+    ) {
+
+        Text(
+            text = "🔥  BREAK THE URGE",
+            color = Accent,
+            fontSize = 14.sp,
+            fontWeight = FontWeight.Bold,
+            letterSpacing = 1.5.sp
+        )
+
+        Spacer(
+            modifier = Modifier.height(6.dp)
+        )
+
+        Text(
+            text = "Take a short pause with an interactive reset.",
+            color = SecondaryText,
+            fontSize = 12.sp
         )
     }
 }

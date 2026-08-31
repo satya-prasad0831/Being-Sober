@@ -1,6 +1,7 @@
 package com.example.beingsober
 
 import android.os.Bundle
+import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.BackHandler
 import androidx.activity.compose.setContent
@@ -47,19 +48,46 @@ import com.example.beingsober.ui.plan.PlanScreen
 import com.example.beingsober.ui.setup.SetupScreen
 import com.example.beingsober.ui.statistics.StatisticsScreen
 import com.example.beingsober.ui.theme.BeingSoberTheme
+import com.google.firebase.messaging.FirebaseMessaging
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.delay
+import com.example.beingsober.ui.urgebreak.UrgeBreakScreen
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        FirebaseMessaging
+            .getInstance()
+            .token
+            .addOnCompleteListener { task ->
+
+                if (!task.isSuccessful) {
+
+                    Log.e(
+                        "FCM_TOKEN",
+                        "Fetching FCM registration token failed",
+                        task.exception
+                    )
+
+                    return@addOnCompleteListener
+                }
+
+                val token = task.result
+
+                Log.d(
+                    "FCM_TOKEN",
+                    "FCM Token: $token"
+                )
+            }
 
         enableEdgeToEdge()
 
         val preferencesManager =
             PreferencesManager(this)
+
+
 
         setContent {
 
@@ -97,6 +125,9 @@ class MainActivity : ComponentActivity() {
                 var showStatistics by remember {
                     mutableStateOf(false)
                 }
+                var showUrgeBreak by remember {
+                    mutableStateOf(false)
+                }
 
                 val incidents =
                     incidentViewModel
@@ -116,25 +147,16 @@ class MainActivity : ComponentActivity() {
                                 showPatterns ||
                                 showEvidence ||
                                 showPlan ||
-                                showStatistics
+                                showStatistics ||
+                                showUrgeBreak
                 ) {
-
                     when {
-
-                        showIncident ->
-                            showIncident = false
-
-                        showPatterns ->
-                            showPatterns = false
-
-                        showEvidence ->
-                            showEvidence = false
-
-                        showPlan ->
-                            showPlan = false
-
-                        showStatistics ->
-                            showStatistics = false
+                        showIncident -> showIncident = false
+                        showPatterns -> showPatterns = false
+                        showEvidence -> showEvidence = false
+                        showPlan -> showPlan = false
+                        showStatistics -> showStatistics = false
+                        showUrgeBreak -> showUrgeBreak = false
                     }
                 }
 
@@ -159,14 +181,16 @@ class MainActivity : ComponentActivity() {
                         }
                     )
 
-                } else {
+                } else if (showUrgeBreak) {
 
-                    /*
-                     * Identify the currently visible screen.
-                     *
-                     * This is only used for animation.
-                     * Your existing Boolean navigation remains unchanged.
-                     */
+                    UrgeBreakScreen(
+                        onBack = {
+                            showUrgeBreak = false
+                        }
+                    )
+
+                }
+                else {
                     val currentScreen =
                         when {
 
@@ -188,10 +212,6 @@ class MainActivity : ComponentActivity() {
                             else ->
                                 "home"
                         }
-
-                    /*
-                     * Smooth page transition
-                     */
                     AnimatedContent(
                         targetState = currentScreen,
                         transitionSpec = {
@@ -235,10 +255,6 @@ class MainActivity : ComponentActivity() {
                     ) { screen ->
 
                         when (screen) {
-
-                            /*
-                             * INCIDENT
-                             */
                             "incident" -> {
 
                                 IncidentScreen(
@@ -257,10 +273,6 @@ class MainActivity : ComponentActivity() {
                                     }
                                 )
                             }
-
-                            /*
-                             * PATTERNS
-                             */
                             "patterns" -> {
 
                                 PatternsScreen(
@@ -272,10 +284,6 @@ class MainActivity : ComponentActivity() {
                                     }
                                 )
                             }
-
-                            /*
-                             * EVIDENCE
-                             */
                             "evidence" -> {
 
                                 EvidenceScreen(
@@ -287,10 +295,6 @@ class MainActivity : ComponentActivity() {
                                     }
                                 )
                             }
-
-                            /*
-                             * STATISTICS
-                             */
                             "statistics" -> {
 
                                 val streakResult =
@@ -311,10 +315,6 @@ class MainActivity : ComponentActivity() {
                                     }
                                 )
                             }
-
-                            /*
-                             * PLAN
-                             */
                             "plan" -> {
 
                                 if (recoveryPlan == null) {
@@ -337,10 +337,6 @@ class MainActivity : ComponentActivity() {
                                     )
                                 }
                             }
-
-                            /*
-                             * HOME
-                             */
                             else -> {
 
                                 HomeScreen(
@@ -367,6 +363,9 @@ class MainActivity : ComponentActivity() {
 
                                     onStatistics = {
                                         showStatistics = true
+                                    },
+                                    onUrgeBreak = {
+                                        showUrgeBreak = true
                                     }
                                 )
                             }
@@ -375,6 +374,23 @@ class MainActivity : ComponentActivity() {
                 }
             }
         }
+    }
+
+
+    override fun onResume() {
+        super.onResume()
+
+        FirebaseMessaging.getInstance().token
+            .addOnCompleteListener { task ->
+                if (!task.isSuccessful) {
+                    Log.e("FCM", "Failed to get FCM token", task.exception)
+                    return@addOnCompleteListener
+                }
+
+                val token = task.result
+
+                Log.d("c", token)
+            }
     }
 }
 
@@ -532,4 +548,5 @@ fun NoPlanScreen(
             )
         }
     }
+
 }
