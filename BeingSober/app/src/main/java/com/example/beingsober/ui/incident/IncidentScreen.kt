@@ -35,6 +35,11 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
+import androidx.compose.foundation.text.KeyboardActions
+import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
+import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.foundation.layout.imePadding
 
 private val Red = Color(0xFFFF3B30)
 
@@ -73,6 +78,7 @@ fun IncidentScreen(
         modifier = Modifier
             .fillMaxSize()
             .background(Color.Black)
+            .imePadding()
             .verticalScroll(rememberScrollState())
             .padding(24.dp)
     ) {
@@ -313,12 +319,20 @@ fun IncidentScreen(
         Spacer(
             modifier = Modifier.height(14.dp)
         )
-
+        val keyboardController = LocalSoftwareKeyboardController.current
         TextField(
             value = notes,
             onValueChange = {
                 notes = it
             },
+            keyboardOptions = KeyboardOptions(
+                imeAction = ImeAction.Done
+            ),
+            keyboardActions = KeyboardActions(
+                onDone = {
+                    keyboardController?.hide()
+                }
+            ),
             modifier = Modifier
                 .fillMaxWidth()
                 .height(120.dp),

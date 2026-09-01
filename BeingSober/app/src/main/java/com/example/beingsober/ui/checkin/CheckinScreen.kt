@@ -26,6 +26,11 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
+import androidx.compose.runtime.rememberCoroutineScope
+import kotlinx.coroutines.launch
 
 private val Background = Color(0xFF050505)
 private val Accent = Color(0xFFFF3B30)
@@ -49,6 +54,11 @@ fun CheckInScreen(
     var urge by remember {
         mutableFloatStateOf(5f)
     }
+    val snackbarHostState = remember {
+        SnackbarHostState()
+    }
+
+    val scope = rememberCoroutineScope()
 
     Box(
         modifier = Modifier
@@ -157,7 +167,11 @@ fun CheckInScreen(
                         RoundedCornerShape(16.dp)
                     )
                     .clickable {
-                        // UI-only for now
+                        scope.launch {
+                            snackbarHostState.showSnackbar(
+                                message = "Check-in complete"
+                            )
+                        }
                     }
                     .padding(18.dp),
                 contentAlignment = Alignment.Center
@@ -172,6 +186,12 @@ fun CheckInScreen(
                 )
             }
         }
+        SnackbarHost(
+            hostState = snackbarHostState,
+            modifier = Modifier
+                .align(Alignment.BottomCenter)
+                .padding(16.dp)
+        )
     }
 }
 

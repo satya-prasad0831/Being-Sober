@@ -3,6 +3,7 @@ package com.example.beingsober.di
 import android.content.Context
 import androidx.room.Room
 import com.example.beingsober.data.local.BeingSoberDatabase
+import com.example.beingsober.data.local.dao.ChallengeDao
 import com.example.beingsober.data.local.dao.IncidentDao
 import dagger.Module
 import dagger.Provides
@@ -25,7 +26,9 @@ object DatabaseModule {
             context,
             BeingSoberDatabase::class.java,
             "being_sober_database"
-        ).build()
+        )
+            .fallbackToDestructiveMigration()
+            .build()
     }
 
     @Provides
@@ -34,5 +37,13 @@ object DatabaseModule {
     ): IncidentDao {
 
         return database.incidentDao()
+    }
+
+    @Provides
+    fun provideChallengeDao(
+        database: BeingSoberDatabase
+    ): ChallengeDao {
+
+        return database.challengeDao()
     }
 }

@@ -39,46 +39,47 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import com.example.beingsober.data.local.PreferencesManager
 import com.example.beingsober.data.soberQuotes
+import com.example.beingsober.ui.checkin.CheckInScreen
+import com.example.beingsober.ui.challenge.ChallengeScreen
+import com.example.beingsober.ui.coping.CopingToolkitScreen
 import com.example.beingsober.ui.evidence.EvidenceScreen
 import com.example.beingsober.ui.home.HomeScreen
 import com.example.beingsober.ui.incident.IncidentScreen
 import com.example.beingsober.ui.incident.IncidentViewModel
+import com.example.beingsober.ui.insights.InsightsScreen
 import com.example.beingsober.ui.patterns.PatternsScreen
 import com.example.beingsober.ui.plan.PlanScreen
 import com.example.beingsober.ui.setup.SetupScreen
 import com.example.beingsober.ui.statistics.StatisticsScreen
 import com.example.beingsober.ui.theme.BeingSoberTheme
+import com.example.beingsober.ui.urgebreak.UrgeBreakScreen
 import com.google.firebase.messaging.FirebaseMessaging
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.delay
-import com.example.beingsober.ui.urgebreak.UrgeBreakScreen
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
         FirebaseMessaging
             .getInstance()
             .token
             .addOnCompleteListener { task ->
 
                 if (!task.isSuccessful) {
-
                     Log.e(
                         "FCM_TOKEN",
                         "Fetching FCM registration token failed",
                         task.exception
                     )
-
                     return@addOnCompleteListener
                 }
 
-                val token = task.result
-
                 Log.d(
                     "FCM_TOKEN",
-                    "FCM Token: $token"
+                    "FCM Token: ${task.result}"
                 )
             }
 
@@ -86,8 +87,6 @@ class MainActivity : ComponentActivity() {
 
         val preferencesManager =
             PreferencesManager(this)
-
-
 
         setContent {
 
@@ -110,6 +109,10 @@ class MainActivity : ComponentActivity() {
                     mutableStateOf(false)
                 }
 
+                var showInsights by remember {
+                    mutableStateOf(false)
+                }
+
                 var showPatterns by remember {
                     mutableStateOf(false)
                 }
@@ -125,7 +128,19 @@ class MainActivity : ComponentActivity() {
                 var showStatistics by remember {
                     mutableStateOf(false)
                 }
+
                 var showUrgeBreak by remember {
+                    mutableStateOf(false)
+                }
+
+                var showCheckIn by remember {
+                    mutableStateOf(false)
+                }
+                var showChallenge by remember {
+                    mutableStateOf(false)
+                }
+
+                var showCopingToolkit by remember {
                     mutableStateOf(false)
                 }
 
@@ -144,19 +159,48 @@ class MainActivity : ComponentActivity() {
                 BackHandler(
                     enabled =
                         showIncident ||
+                                showInsights ||
                                 showPatterns ||
                                 showEvidence ||
                                 showPlan ||
                                 showStatistics ||
-                                showUrgeBreak
+                                showUrgeBreak ||
+                                showCheckIn ||
+                                showChallenge ||
+                                showCopingToolkit
                 ) {
+
                     when {
-                        showIncident -> showIncident = false
-                        showPatterns -> showPatterns = false
-                        showEvidence -> showEvidence = false
-                        showPlan -> showPlan = false
-                        showStatistics -> showStatistics = false
-                        showUrgeBreak -> showUrgeBreak = false
+
+                        showIncident ->
+                            showIncident = false
+
+                        showInsights ->
+                            showInsights = false
+
+                        showPatterns ->
+                            showPatterns = false
+
+                        showEvidence ->
+                            showEvidence = false
+
+                        showPlan ->
+                            showPlan = false
+
+                        showStatistics ->
+                            showStatistics = false
+
+                        showUrgeBreak ->
+                            showUrgeBreak = false
+
+                        showCheckIn ->
+                            showCheckIn = false
+
+                        showChallenge ->
+                            showChallenge = false
+
+                        showCopingToolkit ->
+                            showCopingToolkit = false
                     }
                 }
 
@@ -189,10 +233,26 @@ class MainActivity : ComponentActivity() {
                         }
                     )
 
-                }
-                else {
+                } else if (showCheckIn) {
+
+                    CheckInScreen(
+                        onBack = {
+                            showCheckIn = false
+                        }
+                    )
+
+                } else {
+
                     val currentScreen =
                         when {
+                            showChallenge ->
+                                "challenge"
+
+                            showCopingToolkit ->
+                                "coping"
+
+                            showInsights ->
+                                "insights"
 
                             showIncident ->
                                 "incident"
@@ -212,49 +272,68 @@ class MainActivity : ComponentActivity() {
                             else ->
                                 "home"
                         }
+
                     AnimatedContent(
                         targetState = currentScreen,
+
                         transitionSpec = {
 
                             (
                                     slideInHorizontally(
-                                        animationSpec =
-                                            tween(
-                                                durationMillis = 300
-                                            ),
-                                        initialOffsetX = {
-                                            it
-                                        }
+                                        animationSpec = tween(300),
+                                        initialOffsetX = { it }
                                     ) +
                                             fadeIn(
-                                                animationSpec =
-                                                    tween(
-                                                        durationMillis = 300
-                                                    )
+                                                animationSpec = tween(300)
                                             )
                                     ).togetherWith(
 
                                     slideOutHorizontally(
-                                        animationSpec =
-                                            tween(
-                                                durationMillis = 300
-                                            ),
-                                        targetOffsetX = {
-                                            -it / 4
-                                        }
+                                        animationSpec = tween(200),
+                                        targetOffsetX = { -it / 4 }
                                     ) +
                                             fadeOut(
-                                                animationSpec =
-                                                    tween(
-                                                        durationMillis = 200
-                                                    )
+                                                animationSpec = tween(200)
                                             )
                                 )
                         },
+
                         label = "BeingSoberScreenTransition"
+
                     ) { screen ->
 
                         when (screen) {
+                            "challenge" -> {
+
+                                ChallengeScreen(
+                                    onBack = {
+                                        showChallenge = false
+                                    }
+                                )
+                            }
+
+                            "coping" -> {
+
+                                CopingToolkitScreen(
+                                    onBack = {
+                                        showCopingToolkit = false
+                                    },
+                                    onCalmDrop = {
+                                        showCopingToolkit = false
+                                        showUrgeBreak = true
+                                    }
+                                )
+                            }
+
+                            "insights" -> {
+
+                                InsightsScreen(
+                                    onBack = {
+                                        showInsights = false
+                                    }
+                                )
+                            }
+
                             "incident" -> {
 
                                 IncidentScreen(
@@ -273,6 +352,7 @@ class MainActivity : ComponentActivity() {
                                     }
                                 )
                             }
+
                             "patterns" -> {
 
                                 PatternsScreen(
@@ -284,6 +364,7 @@ class MainActivity : ComponentActivity() {
                                     }
                                 )
                             }
+
                             "evidence" -> {
 
                                 EvidenceScreen(
@@ -295,6 +376,7 @@ class MainActivity : ComponentActivity() {
                                     }
                                 )
                             }
+
                             "statistics" -> {
 
                                 val streakResult =
@@ -315,6 +397,7 @@ class MainActivity : ComponentActivity() {
                                     }
                                 )
                             }
+
                             "plan" -> {
 
                                 if (recoveryPlan == null) {
@@ -337,6 +420,7 @@ class MainActivity : ComponentActivity() {
                                     )
                                 }
                             }
+
                             else -> {
 
                                 HomeScreen(
@@ -362,10 +446,18 @@ class MainActivity : ComponentActivity() {
                                     },
 
                                     onStatistics = {
-                                        showStatistics = true
+                                        showInsights = true
                                     },
+
                                     onUrgeBreak = {
-                                        showUrgeBreak = true
+                                        showCopingToolkit = true
+                                    },
+
+                                    onCheckIn = {
+                                        showCheckIn = true
+                                    },
+                                    onChallenge = {
+                                        showChallenge = true
                                     }
                                 )
                             }
@@ -376,20 +468,27 @@ class MainActivity : ComponentActivity() {
         }
     }
 
-
     override fun onResume() {
         super.onResume()
 
-        FirebaseMessaging.getInstance().token
+        FirebaseMessaging
+            .getInstance()
+            .token
             .addOnCompleteListener { task ->
+
                 if (!task.isSuccessful) {
-                    Log.e("FCM", "Failed to get FCM token", task.exception)
+                    Log.e(
+                        "FCM",
+                        "Failed to get FCM token",
+                        task.exception
+                    )
                     return@addOnCompleteListener
                 }
 
-                val token = task.result
-
-                Log.d("c", token)
+                Log.d(
+                    "FCM",
+                    task.result
+                )
             }
     }
 }
@@ -548,5 +647,4 @@ fun NoPlanScreen(
             )
         }
     }
-
 }
